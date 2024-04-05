@@ -1,27 +1,26 @@
+// frontend/GameResultScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
+import bgImage from './assets/bg.jpeg';
 
 const GameResultScreen = ({ navigation, route }) => {
     const { result, leaderboard } = route.params;
 
     return (
+        <ImageBackground source={bgImage} style={styles.backgroundContainer}>
         <View style={styles.container}>
-            <View style={result === 'correct' ? styles.correctResult : styles.incorrectResult}>
-                <Text style={styles.resultText}>{result === 'correct' ? 'Correct!' : 'Incorrect!'}</Text>
+            <View style={result ? styles.correctResult : styles.incorrectResult}>
+                <Text style={styles.resultText}>{result ? 'Correct!' : 'Incorrect!'}</Text>
             </View>
             <Text style={styles.leaderboardTitle}>Leaderboard</Text>
             <View style={styles.leaderboardContainer}>
-                {/* Check if leaderboard is provided and not empty */}
-                {leaderboard && leaderboard.length > 0 ? (
-                    leaderboard.map((leader, index) => (
-                        <Text key={index} style={styles.leaderText}>{index + 1}. {leader.username}</Text>
-                    ))
-                ) : (
-                    <Text style={styles.leaderText}>No leaderboard data available.</Text>
-                )}
+                {leaderboard.map((leader, index) => (
+                    <Text key={index} style={styles.leaderText}>{index + 1}. {leader.username}</Text>
+                ))}
             </View>
-            <Button title="Next" onPress={() => navigation.navigate('MathGame')} />
+            <Button title="Try Again" onPress={() => navigation.navigate('MathGame')} />
         </View>
+        </ImageBackground>
     );
 };
 

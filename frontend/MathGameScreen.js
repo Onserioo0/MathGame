@@ -1,47 +1,53 @@
+// frontend/MathGameScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ImageBackground } from 'react-native';
-import bgImage from './assets/bg.jpeg'; // Make sure this path is correct
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
 const MathGameScreen = ({ navigation }) => {
   const [number1, setNumber1] = useState(Math.floor(Math.random() * 100) + 1);
   const [number2, setNumber2] = useState(Math.floor(Math.random() * 100) + 1);
   const [answer, setAnswer] = useState('');
 
-  const checkAnswer = () => {
-    const isCorrect = parseInt(answer) === number1 + number2;
-    navigation.navigate('GameResult', {
-      result: isCorrect ? 'correct' : 'incorrect',
-      // Assume you will handle the leaderboard state and passing in the `GameResultScreen`
-    });
+  async function getLeaderboard() {
+    try {
+        const response = await fetch('http://localhost:3000/leaderboard');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError("Oops, we haven't got JSON!");
+        }
+        const data = await response.json();
+        return data; // Assuming data is an array of leaderboard entries
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error.message);
+        return []; // Return an empty array in case of error
+    }
+}
 
-    setAnswer('');
-    setNumber1(Math.floor(Math.random() * 100) + 1);
-    setNumber2(Math.floor(Math.random() * 100) + 1);
+  const checkAnswer = async () => {
+    const correctAnswer = number1 + number2;
+    const isCorrect = parseInt(answer) === correctAnswer;
+    const leaderboardData = await getLeaderboard();
+    navigation.navigate('GameResult', { result: isCorrect, leaderboard: leaderboardData });
   };
 
   return (
-    <ImageBackground source={bgImage} style={styles.backgroundContainer}>
-      <View style={styles.container}>
-        <Text style={styles.question}>What is {number1} + {number2}?</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType='numeric'
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Your answer"
-        />
-        <Button title="Submit" onPress={checkAnswer} />
-      </View>
-    </ImageBackground>
+    <View style={styles.container}>
+      <Text style={styles.question}>What is {number1} + {number2}?</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType='numeric'
+        value={answer}
+        onChangeText={setAnswer}
+        placeholder="Your answer"
+      />
+      <Button title="Submit" onPress={checkAnswer} style={styles.btn}/>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundContainer: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -53,13 +59,16 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   input: {
-    marginVertical: 10,
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
     borderWidth: 1,
+    marginTop: 8,
     padding: 10,
-    borderRadius: 5,
-    width: '80%', // Adjusted to 80% for better usability
-    backgroundColor: 'aliceblue',
   },
+  btn: {
+    color: 'red',
+  }
 });
 
 export default MathGameScreen;
