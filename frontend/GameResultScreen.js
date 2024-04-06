@@ -1,6 +1,6 @@
 // frontend/GameResultScreen.js
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, ImageBackground } from 'react-native';
 import bgImage from './assets/bg.jpeg';
 
 const GameResultScreen = ({ navigation, route }) => {

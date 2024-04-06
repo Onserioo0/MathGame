@@ -2,12 +2,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
+const cors = require('cors'); // Import cors module
 
 const app = express();
 const port = 3000;
 const db = new sqlite3.Database(':memory:');
 
 app.use(bodyParser.json());
+app.use(cors()); 
 
 // Initialize database
 db.serialize(() => {
@@ -46,6 +48,20 @@ app.post('/login', (req, res) => {
     }
   });
 });
+
+app.get('/leaderboard', (req, res) => {
+  // Assuming you have a table "results" with columns "username" and "score"
+  const query = "SELECT username, score FROM results ORDER BY score DESC LIMIT 10"; // Adjust according to your data structure
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({status: "error", message: err.message});
+      return;
+    }
+    res.json({status: "success", leaderboard: rows});
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
